@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support.exe - Windows 98 Edition</title>
+    
+    <!-- 98.css Retro Styling -->
+    <link rel="stylesheet" href="https://unpkg.com/98.css" />
+    
+    <!-- Tailwind CSS (for structure & utility spacing) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- FontAwesome icons for retro/tech vibe -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js for 2D charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Three.js for 3D Pie Chart visualization -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: "MS Sans Serif", "Microsoft Sans Serif", Tahoma, sans-serif;
+            background-color: #008080; /* Windows 98 Teal */
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .window {
+            box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+        }
+
+        .desktop-icon {
+            width: 75px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+            font-size: 11px;
+            cursor: pointer;
+            padding: 4px;
+            border: 1px transparent solid;
+        }
+
+        .desktop-icon:hover {
+            background-color: rgba(0, 0, 128, 0.4);
+            border: 1px dotted #ffffff;
+        }
+
+        .desktop-icon i {
+            font-size: 32px;
+            margin-bottom: 4px;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+
+        .taskbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 36px;
+            background: #c0c0c0;
+            border-top: 2px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2px 4px;
+            z-index: 99999;
+        }
+
+        .start-menu {
+            position: fixed;
+            bottom: 36px;
+            left: 2px;
+            width: 240px;
+            background: #c0c0c0;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            display: none;
+            flex-direction: row;
+            z-index: 100000;
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+        }
+
+        .start-sidebar {
+            width: 30px;
+            background: linear-gradient(to top, #000080, #1084d0);
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 10px 4px;
+        }
+
+        .start-items {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2px;
+        }
+
+        .start-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            color: black;
+        }
+
+        .start-item:hover {
+            background-color: #000080;
+            color: white;
+        }
+
+        .start-item i {
+            width: 18px;
+            text-align: center;
+        }
+
+        .tray-clock {
+            border: 2px inset #fff;
+            padding: 2px 8px;
+            font-size: 11px;
+            background: #c0c0c0;
+        }
+
+        .badge-tag {
+            font-size: 10px;
+            padding: 1px 5px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        ::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+            background: #c0c0c0;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #c0c0c0;
+            box-shadow: inset -1px -1px #0a0a0a, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+        }
+
+        #threejs-canvas-container {
+            width: 100%;
+            height: 260px;
+            background: #000000;
+            border: 2px inset #fff;
+            position: relative;
+        }
+
+        .badge-warn { background: #ffcc00; color: #000; }
+        .badge-timeout { background: #ff9900; color: #fff; }
+        .badge-ban { background: #cc0000; color: #fff; }
+        .badge-tech { background: #0088cc; color: #fff; }
+    </style>
+</head>
+<body class="flex flex-col">
+
+    <!-- DESKTOP AREA -->
+    <div class="flex-1 relative p-4 flex flex-col flex-wrap content-start gap-6" id="desktop">
+        <div class="desktop-icon" onclick="openNav('home')">
+            <i class="fa-solid fa-desktop text-amber-300"></i>
+            <span>Support.exe</span>
+        </div>
+        <div class="desktop-icon" onclick="openNav('analytics')">
+            <i class="fa-solid fa-chart-pie text-cyan-300"></i>
+            <span>Analitiche 3D</span>
+        </div>
+        <div class="desktop-icon" onclick="openNav('servers')">
+            <i class="fa-brands fa-discord text-indigo-300"></i>
+            <span>Server Discord</span>
+        </div>
+        <div class="desktop-icon" onclick="openNav('tech')">
+            <i class="fa-solid fa-wrench text-gray-300"></i>
+            <span>Tech Support</span>
+        </div>
+        <div class="desktop-icon" onclick="openNav('mod')">
+            <i class="fa-solid fa-shield-halved text-red-400"></i>
+            <span>Moderazione</span>
+        </div>
+        <div class="desktop-icon" onclick="openNav('calendar')">
+            <i class="fa-solid fa-calendar-days text-green-300"></i>
+            <span>Calendario</span>
+        </div>
+        <div class="desktop-icon" onclick="openNav('community')">
+            <i class="fa-solid fa-users text-purple-300"></i>
+            <span>Community</span>
+        </div>
+
+        <!-- MAIN APPLICATION WINDOW -->
+        <div class="window absolute top-4 left-24 right-4 bottom-14 flex flex-col z-10" id="main-window">
+            <div class="title-bar flex justify-between items-center px-2 py-1 select-none">
+                <div class="title-bar-text flex items-center gap-2 font-bold text-sm">
+                    <i class="fa-solid fa-headset"></i> Support.exe v2.5 - [Discord Staff & Tech Hub]
+                </div>
+                <div class="title-bar-controls flex gap-1">
+                    <button aria-label="Minimize" onclick="toggleWindow()"></button>
+                    <button aria-label="Maximize" onclick="maximizeWindow()"></button>
+                    <button aria-label="Close" onclick="alert('Support.exe è attivo nella tray bar.')"></button>
+                </div>
+            </div>
+
+            <div class="flex gap-4 px-2 py-1 text-xs bg-[#c0c0c0] border-b border-[#808080]">
+                <span class="hover:underline cursor-pointer" onclick="openNewModal('log')"><u>F</u>ile (Nuovo Ticket)</span>
+                <span class="hover:underline cursor-pointer" onclick="openNav('analytics')"><u>V</u>isualizza</span>
+                <span class="hover:underline cursor-pointer" onclick="openNav('servers')"><u>S</u>erver</span>
+                <span class="hover:underline cursor-pointer" onclick="alert('Support.exe Win98 - CRUD Fix Edition.')"><u>?</u> Info</span>
+            </div>
+
+            <div class="window-body flex-1 flex overflow-hidden p-2 gap-2 bg-[#c0c0c0]">
+                <!-- Left Sidebar Navigation -->
+                <div class="w-48 bg-white border-2 border-inset p-2 flex flex-col gap-1 overflow-y-auto shrink-0">
+                    <div class="text-xs font-bold text-gray-600 mb-1 border-b pb-1">NAVIGAZIONE</div>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('home')">
+                        <i class="fa-solid fa-house text-blue-700"></i> Home Dashboard
+                    </button>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('analytics')">
+                        <i class="fa-solid fa-chart-line text-purple-700"></i> Analitiche (3D)
+                    </button>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('servers')">
+                        <i class="fa-brands fa-discord text-indigo-600"></i> Server Discord
+                    </button>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('tech')">
+                        <i class="fa-solid fa-headset text-teal-700"></i> Tech Support
+                    </button>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('mod')">
+                        <i class="fa-solid fa-gavel text-red-700"></i> Moderazione & Logs
+                    </button>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('calendar')">
+                        <i class="fa-solid fa-calendar text-green-700"></i> Calendario Staff
+                    </button>
+                    <button class="button flex items-center gap-2 justify-start w-full text-xs py-1" onclick="openNav('community')">
+                        <i class="fa-solid fa-globe text-orange-600"></i> Community Esterne
+                    </button>
+
+                    <div class="mt-auto border-t pt-2 text-center">
+                        <button class="button w-full font-bold text-xs py-2 bg-emerald-200" onclick="openNewModal('log')">
+                            <i class="fa-solid fa-plus-circle"></i> Aggiungi Registro
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right Dynamic Content Area -->
+                <div class="flex-1 bg-[#dfdfdf] border-2 border-inset p-3 overflow-y-auto" id="content-area">
+                </div>
+            </div>
+
+            <!-- Status Bar -->
+            <div class="status-bar flex justify-between px-2 py-1 text-xs border-t border-[#808080] bg-[#c0c0c0]">
+                <p class="status-bar-field" id="status-text">Stato: Sistema Operativo Pronto</p>
+                <p class="status-bar-field text-right" id="total-logs-count">Totale Log Registrati: 0</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- START MENU -->
+    <div class="start-menu" id="start-menu">
+        <div class="start-sidebar">SUPPORT.EXE</div>
+        <div class="start-items">
+            <div class="start-item" onclick="openNav('home'); toggleStartMenu();">
+                <i class="fa-solid fa-house text-blue-800"></i> <b>Home Dashboard</b>
+            </div>
+            <div class="start-item" onclick="openNav('analytics'); toggleStartMenu();">
+                <i class="fa-solid fa-chart-pie text-purple-800"></i> Analitiche (3D Graph)
+            </div>
+            <div class="start-item" onclick="openNav('servers'); toggleStartMenu();">
+                <i class="fa-brands fa-discord text-indigo-700"></i> Server Discord
+            </div>
+            <div class="start-item" onclick="openNav('tech'); toggleStartMenu();">
+                <i class="fa-solid fa-wrench text-teal-800"></i> Tech Support Hub
+            </div>
+            <div class="start-item" onclick="openNav('mod'); toggleStartMenu();">
+                <i class="fa-solid fa-shield text-red-800"></i> Moderazione & Mod Logs
+            </div>
+            <div class="start-item" onclick="openNav('calendar'); toggleStartMenu();">
+                <i class="fa-solid fa-calendar-days text-green-800"></i> Calendario Impegni
+            </div>
+            <div class="start-item" onclick="openNav('community'); toggleStartMenu();">
+                <i class="fa-solid fa-share-nodes text-orange-800"></i> Community (X, Reddit)
+            </div>
+            <hr style="border-top:1px solid #808080; border-bottom:1px solid #fff; margin:3px 0;">
+            <div class="start-item" onclick="openNewModal('log'); toggleStartMenu();">
+                <i class="fa-solid fa-file-circle-plus text-emerald-800"></i> Aggiungi Log...
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTTOM TASKBAR -->
+    <div class="taskbar">
+        <div class="flex items-center gap-2">
+            <button class="button flex items-center gap-2 font-bold px-3 py-1 active:translate-y-0.5" onclick="toggleStartMenu()">
+                <img src="https://win98icons.alexmeub.com/icons/png/windows_slanted-0.png" class="w-4 h-4" alt="Win98 Logo">
+                Start
+            </button>
+            <div class="h-5 w-0.5 bg-gray-400 border-r border-white"></div>
+            <button class="button flex items-center gap-1 text-xs px-3 py-1 font-bold" onclick="toggleWindow()">
+                <i class="fa-solid fa-headset text-blue-800"></i> Support.exe
+            </button>
+        </div>
+        <div class="tray-clock flex items-center gap-2">
+            <i class="fa-solid fa-volume-high text-[#555]"></i>
+            <span id="real-time-clock">12:00 PM</span>
+        </div>
+    </div>
+
+    <!-- MODAL: LOG / TICKET -->
+    <div class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4" id="log-modal">
+        <div class="window w-full max-w-lg">
+            <div class="title-bar flex justify-between items-center px-2 py-1">
+                <div class="title-bar-text font-bold" id="log-modal-title">Gestione Log Intervento</div>
+                <div class="title-bar-controls">
+                    <button aria-label="Close" onclick="closeModal('log-modal')"></button>
+                </div>
+            </div>
+            <div class="window-body p-4 bg-[#c0c0c0]">
+                <form id="new-log-form" onsubmit="handleSaveLog(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="log-edit-id" value="">
+                    <div>
+                        <label class="block mb-1 font-bold">Utente Discord Aiutato/Sanzionato:</label>
+                        <input type="text" id="log-username" required class="w-full p-1 border-2 border-inset" placeholder="es. Mario#1234">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block mb-1 font-bold">Server Discord:</label>
+                            <select id="log-server" class="w-full p-1 border-2 border-inset"></select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 font-bold">Categoria:</label>
+                            <select id="log-category" onchange="updateActionTypes()" class="w-full p-1 border-2 border-inset">
+                                <option value="Tech Support">Tech Support</option>
+                                <option value="Moderazione">Moderazione</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">Tipo Azione / Mod Log:</label>
+                        <select id="log-action" class="w-full p-1 border-2 border-inset"></select>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">Riassunto Conversazione / Note:</label>
+                        <textarea id="log-summary" rows="3" required class="w-full p-1 border-2 border-inset"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block mb-1 font-bold">Link Screenshot (Proof):</label>
+                            <input type="url" id="log-screenshot" class="w-full p-1 border-2 border-inset" placeholder="https://imgur.com/...">
+                        </div>
+                        <div>
+                            <label class="block mb-1 font-bold">Link Ticket Discord:</label>
+                            <input type="url" id="log-link" class="w-full p-1 border-2 border-inset" placeholder="https://discord.com/channels/...">
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" class="button px-4 py-1" onclick="closeModal('log-modal')">Annulla</button>
+                        <button type="submit" class="button px-4 py-1 font-bold bg-blue-100">Salva Log</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SERVER DISCORD -->
+    <div class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4" id="server-modal">
+        <div class="window w-full max-w-md">
+            <div class="title-bar flex justify-between items-center px-2 py-1">
+                <div class="title-bar-text font-bold" id="server-modal-title">Gestisci Server Discord</div>
+                <div class="title-bar-controls">
+                    <button aria-label="Close" onclick="closeModal('server-modal')"></button>
+                </div>
+            </div>
+            <div class="window-body p-4 bg-[#c0c0c0]">
+                <form id="server-form" onsubmit="handleSaveServer(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="server-edit-id" value="">
+                    <div>
+                        <label class="block mb-1 font-bold">Nome Server Discord:</label>
+                        <input type="text" id="server-name" required class="w-full p-1 border-2 border-inset">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">URL Icona / Logo:</label>
+                        <input type="url" id="server-icon" class="w-full p-1 border-2 border-inset" placeholder="https://placehold.co/40x40">
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">Categoria:</label>
+                        <select id="server-category" class="w-full p-1 border-2 border-inset">
+                            <option value="both">Entrambi (Tech & Mod)</option>
+                            <option value="tech_support">Solo Tech Support</option>
+                            <option value="moderation">Solo Moderazione</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" class="button px-4 py-1" onclick="closeModal('server-modal')">Annulla</button>
+                        <button type="submit" class="button px-4 py-1 font-bold bg-blue-100">Salva Server</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: COMMUNITY -->
+    <div class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4" id="community-modal">
+        <div class="window w-full max-w-md">
+            <div class="title-bar flex justify-between items-center px-2 py-1">
+                <div class="title-bar-text font-bold" id="community-modal-title">Gestisci Community Esterna</div>
+                <div class="title-bar-controls">
+                    <button aria-label="Close" onclick="closeModal('community-modal')"></button>
+                </div>
+            </div>
+            <div class="window-body p-4 bg-[#c0c0c0]">
+                <form id="community-form" onsubmit="handleSaveCommunity(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="community-edit-id" value="">
+                    <div>
+                        <label class="block mb-1 font-bold">Nome Community / Canale:</label>
+                        <input type="text" id="community-name" required class="w-full p-1 border-2 border-inset">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block mb-1 font-bold">Piattaforma:</label>
+                            <select id="community-platform" class="w-full p-1 border-2 border-inset">
+                                <option value="X (Twitter)">X (Twitter)</option>
+                                <option value="Reddit">Reddit</option>
+                                <option value="Yapper">Yapper</option>
+                                <option value="Forum">Forum</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block mb-1 font-bold">Ruolo / Tag:</label>
+                            <input type="text" id="community-role" class="w-full p-1 border-2 border-inset">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">Descrizione Attività:</label>
+                        <textarea id="community-desc" rows="2" class="w-full p-1 border-2 border-inset"></textarea>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" class="button px-4 py-1" onclick="closeModal('community-modal')">Annulla</button>
+                        <button type="submit" class="button px-4 py-1 font-bold bg-blue-100">Salva Community</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CALENDAR -->
+    <div class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4" id="calendar-modal">
+        <div class="window w-full max-w-md">
+            <div class="title-bar flex justify-between items-center px-2 py-1">
+                <div class="title-bar-text font-bold" id="calendar-modal-title">Gestisci Impegno</div>
+                <div class="title-bar-controls">
+                    <button aria-label="Close" onclick="closeModal('calendar-modal')"></button>
+                </div>
+            </div>
+            <div class="window-body p-4 bg-[#c0c0c0]">
+                <form id="calendar-form" onsubmit="handleSaveEvent(event)" class="space-y-3 text-xs">
+                    <input type="hidden" id="event-edit-id" value="">
+                    <div>
+                        <label class="block mb-1 font-bold">Titolo Impegno:</label>
+                        <input type="text" id="event-title" required class="w-full p-1 border-2 border-inset">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block mb-1 font-bold">Server / Piattaforma:</label>
+                            <input type="text" id="event-server" class="w-full p-1 border-2 border-inset">
+                        </div>
+                        <div>
+                            <label class="block mb-1 font-bold">Data (AAAA-MM-GG):</label>
+                            <input type="date" id="event-date" required class="w-full p-1 border-2 border-inset">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block mb-1 font-bold">Tipo Impegno:</label>
+                        <select id="event-type" class="w-full p-1 border-2 border-inset">
+                            <option value="Meeting">Meeting / Riunione</option>
+                            <option value="Tech">Manutenzione Tech</option>
+                            <option value="Mod">Moderazione Task</option>
+                            <option value="Generale">Generale</option>
+                        </select>
+                    </div>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" class="button px-4 py-1" onclick="closeModal('calendar-modal')">Annulla</button>
+                        <button type="submit" class="button px-4 py-1 font-bold bg-blue-100">Salva Impegno</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        // --- DEFAULT DATA & LOCALSTORAGE PERSISTENCE ---
+        const initialServers = [
+            { id: 'srv-1', name: 'Tech Italia Gaming', icon: 'https://placehold.co/40x40/5865F2/ffffff?text=TIG', category: 'both', platform: 'discord' },
+            { id: 'srv-2', name: 'Dev & Mod Support HQ', icon: 'https://placehold.co/40x40/57F287/000000?text=DM', category: 'tech_support', platform: 'discord' },
+            { id: 'srv-3', name: 'CyberSec & Hardware IT', icon: 'https://placehold.co/40x40/EB459E/ffffff?text=CS', category: 'tech_support', platform: 'discord' },
+            { id: 'srv-4', name: 'Anime & Gaming Lounge', icon: 'https://placehold.co/40x40/FEE75C/000000?text=AGL', category: 'moderation', platform: 'discord' }
+        ];
+
+        const initialLogs = [
+            { id: 'log-101', username: 'AlexGamer99', serverId: 'srv-1', category: 'Tech Support', action: 'Configurazione Bot', summary: 'Risolto problema autorizzazioni bot audio in Vocale #2.', screenshot: 'https://placehold.co/600x400/222/fff?text=Audio+Fix', link: 'https://discord.com/channels/123/456/789', date: '2026-11-09T14:30:00' },
+            { id: 'log-102', username: 'DarkShadow_01', serverId: 'srv-4', category: 'Moderazione', action: 'Ban', summary: 'Spam di link phishing nei canali pubblici. Applicato ban permanente.', screenshot: 'https://placehold.co/600x400/800/fff?text=Phishing+Proof', link: 'https://discord.com/channels/123/456/790', date: '2026-11-08T09:15:00' },
+            { id: 'log-103', username: 'Elena_Tech', serverId: 'srv-2', category: 'Tech Support', action: 'Risoluzione HW/SW', summary: 'Installazione driver GPU NVIDIA dopo errore di BSOD.', screenshot: 'https://placehold.co/600x400/008/fff?text=GPU+Fix', link: 'https://discord.com/channels/123/456/791', date: '2026-11-07T18:45:00' },
+            { id: 'log-104', username: 'TrollUser404', serverId: 'srv-1', category: 'Moderazione', action: 'Timeout', summary: 'Linguaggio inappropriato e flame in chat generale. Messo in timeout 24 ore.', screenshot: '', link: 'https://discord.com/channels/123/456/792', date: '2026-11-06T11:20:00' }
+        ];
+
+        const initialEvents = [
+            { id: 'ev-1', title: 'Riunione Staff Co-Owner', server: 'Tech Italia Gaming', date: '2026-11-12', type: 'Meeting' },
+            { id: 'ev-2', title: 'Manutenzione Bot Moderazione', server: 'Dev & Mod Support HQ', date: '2026-11-15', type: 'Tech' }
+        ];
+
+        const initialCommunities = [
+            { id: 'com-1', name: 'X (Twitter) Community Support', platform: 'X (Twitter)', role: 'Moderatore Attivo', desc: 'Gestione segnalazioni bug via DM e moderazione risposte ufficiali nei post del server.' },
+            { id: 'com-2', name: 'Subreddit r/HardwareIT', platform: 'Reddit', role: 'Moderatore Admin', desc: 'Filtro post di aiuto hardware e review settimanale dei thread pinned.' }
+        ];
+
+        let servers = JSON.parse(localStorage.getItem('support_exe_servers')) || initialServers;
+        let logs = JSON.parse(localStorage.getItem('support_exe_logs')) || initialLogs;
+        let events = JSON.parse(localStorage.getItem('support_exe_events')) || initialEvents;
+        let communities = JSON.parse(localStorage.getItem('support_exe_communities')) || initialCommunities;
+
+        function saveData() {
+            localStorage.setItem('support_exe_servers', JSON.stringify(servers));
+            localStorage.setItem('support_exe_logs', JSON.stringify(logs));
+            localStorage.setItem('support_exe_events', JSON.stringify(events));
+            localStorage.setItem('support_exe_communities', JSON.stringify(communities));
+            updateStatusBar();
+        }
+
+        // --- GLOBAL EVENT DELEGATION FOR CRUD ACTIONS ---
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('[data-crud-action]');
+            if (!btn) return;
+
+            const action = btn.getAttribute('data-crud-action');
+            const id = btn.getAttribute('data-id');
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (action === 'delete-log') {
+                if (confirm('Confermi l\'eliminazione definitiva di questo log/ticket?')) {
+                    logs = logs.filter(l => l.id !== id);
+                    saveData();
+                    openNav(currentSection);
+                }
+            } else if (action === 'edit-log') {
+                openEditLogModal(id);
+            } else if (action === 'delete-server') {
+                if (confirm('Attenzione: eliminando il server cancellerai anche tutti i log collegati ad esso. Continuare?')) {
+                    servers = servers.filter(s => s.id !== id);
+                    logs = logs.filter(l => l.serverId !== id);
+                    saveData();
+                    openNav(currentSection);
+                }
+            } else if (action === 'edit-server') {
+                openEditServerModal(id);
+            } else if (action === 'delete-community') {
+                if (confirm('Confermi l\'eliminazione di questa community esterna?')) {
+                    communities = communities.filter(c => c.id !== id);
+                    saveData();
+                    openNav(currentSection);
+                }
+            } else if (action === 'edit-community') {
+                openEditCommunityModal(id);
+            } else if (action === 'delete-event') {
+                if (confirm('Rimuovere questo evento dal calendario?')) {
+                    events = events.filter(ev => ev.id !== id);
+                    saveData();
+                    openNav(currentSection);
+                }
+            } else if (action === 'edit-event') {
+                openEditEventModal(id);
+            }
+        });
+
+        // --- NAVIGATION ENGINE ---
+        let currentSection = 'home';
+
+        function openNav(section) {
+            currentSection = section;
+            const contentArea = document.getElementById('content-area');
+            
+            if (window.threeAnimationId) {
+                cancelAnimationFrame(window.threeAnimationId);
+                window.threeAnimationId = null;
+            }
+
+            switch(section) {
+                case 'home':
+                    renderHome(contentArea);
+                    break;
+                case 'analytics':
+                    renderAnalytics(contentArea);
+                    break;
+                case 'servers':
+                    renderServers(contentArea);
+                    break;
+                case 'tech':
+                    renderFilteredLogs(contentArea, 'Tech Support');
+                    break;
+                case 'mod':
+                    renderFilteredLogs(contentArea, 'Moderazione');
+                    break;
+                case 'calendar':
+                    renderCalendar(contentArea);
+                    break;
+                case 'community':
+                    renderCommunity(contentArea);
+                    break;
+                default:
+                    renderHome(contentArea);
+            }
+            updateStatusBar();
+        }
+
+        // --- HOME DASHBOARD ---
+        function renderHome(container) {
+            const totalHelped = logs.length;
+            const techCount = logs.filter(l => l.category === 'Tech Support').length;
+            const modCount = logs.filter(l => l.category === 'Moderazione').length;
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div class="bg-white border-2 border-inset p-3 flex flex-col items-center">
+                            <span class="text-xs font-bold text-gray-600">TOTALE PERSONE AIUTATE</span>
+                            <span class="text-3xl font-black text-blue-900 my-1">${totalHelped}</span>
+                            <span class="badge-tag bg-emerald-200 text-emerald-800"><i class="fa-solid fa-arrow-trend-up"></i> +4 questa settimana</span>
+                        </div>
+                        <div class="bg-white border-2 border-inset p-3 flex flex-col items-center">
+                            <span class="text-xs font-bold text-gray-600">TECH SUPPORT</span>
+                            <span class="text-3xl font-black text-teal-800 my-1">${techCount}</span>
+                            <span class="badge-tag bg-blue-100 text-blue-800">+2 ultimi 7 giorni</span>
+                        </div>
+                        <div class="bg-white border-2 border-inset p-3 flex flex-col items-center">
+                            <span class="text-xs font-bold text-gray-600">MODERAZIONE & MOD LOGS</span>
+                            <span class="text-3xl font-black text-red-700 my-1">${modCount}</span>
+                            <span class="badge-tag bg-amber-100 text-amber-800">+2 questo mese</span>
+                        </div>
+                        <div class="bg-white border-2 border-inset p-3 flex flex-col items-center">
+                            <span class="text-xs font-bold text-gray-600">SERVER DISCORD</span>
+                            <span class="text-3xl font-black text-indigo-800 my-1">${servers.length}</span>
+                            <span class="badge-tag bg-purple-100 text-purple-800">Discord Staff Hub</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-white border-2 border-inset p-3 flex flex-col">
+                            <h4 class="text-xs font-bold mb-2 border-b pb-1">
+                                <i class="fa-solid fa-chart-line text-blue-700"></i> CRESCITA PERSONE AIUTATE
+                            </h4>
+                            <div class="h-48 relative">
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-2 border-inset p-3 flex flex-col">
+                            <h4 class="text-xs font-bold mb-2 border-b pb-1">
+                                <i class="fa-solid fa-chart-pie text-purple-700"></i> DISTRIBUZIONE SERVER DISCORD
+                            </h4>
+                            <div class="h-48 relative">
+                                <canvas id="pieServerChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="bg-white border-2 border-inset p-3">
+                            <h4 class="text-xs font-bold mb-2 border-b pb-1 flex justify-between items-center">
+                                <span><i class="fa-solid fa-clock-rotate-left"></i> ULTIMI LOGS REGISTRATI</span>
+                                <button class="button text-xs px-2 py-0.5" onclick="openNav('mod')">Vedi Tutti</button>
+                            </h4>
+                            <div class="space-y-2 max-h-56 overflow-y-auto">
+                                ${logs.slice(0, 5).map(log => {
+                                    const srv = servers.find(s => s.id === log.serverId) || { name: 'Discord', icon: '' };
+                                    return `
+                                        <div class="border border-gray-300 p-2 text-xs bg-gray-50 flex justify-between items-center">
+                                            <div>
+                                                <div class="flex items-center gap-1.5 font-bold">
+                                                    <img src="${srv.icon}" class="w-4 h-4 rounded" onerror="this.src='https://placehold.co/20x20'">
+                                                    <span>${srv.name}</span>
+                                                    <span class="text-gray-500 font-normal">(${log.username})</span>
+                                                </div>
+                                                <p class="text-gray-700 italic truncate max-w-xs">"${log.summary}"</p>
+                                            </div>
+                                            <div class="flex items-center gap-1">
+                                                <span class="badge-tag ${getBadgeClass(log.action)}">${log.action}</span>
+                                                <button class="button text-[10px] px-1.5 py-0.5" data-crud-action="edit-log" data-id="${log.id}"><i class="fa-solid fa-pen"></i></button>
+                                                <button class="button text-[10px] px-1.5 py-0.5 text-red-700" data-crud-action="delete-log" data-id="${log.id}"><i class="fa-solid fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <div class="bg-white border-2 border-inset p-3">
+                            <h4 class="text-xs font-bold mb-2 border-b pb-1">
+                                <i class="fa-solid fa-align-left text-amber-700"></i> RIASSUNTI CONVERSAZIONI RECENTI
+                            </h4>
+                            <div class="space-y-2 max-h-56 overflow-y-auto">
+                                ${logs.map(log => `
+                                    <div class="p-2 border-b border-gray-200 text-xs">
+                                        <div class="font-bold text-blue-900 flex justify-between items-center">
+                                            <span>Utente: ${log.username}</span>
+                                            <div class="flex items-center gap-1">
+                                                <button class="button text-[10px] px-1" data-crud-action="edit-log" data-id="${log.id}"><i class="fa-solid fa-pen"></i></button>
+                                                <button class="button text-[10px] px-1 text-red-700" data-crud-action="delete-log" data-id="${log.id}"><i class="fa-solid fa-trash"></i></button>
+                                            </div>
+                                        </div>
+                                        <p class="text-gray-800 mt-1 leading-snug">${log.summary}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            initDashboardCharts();
+        }
+
+        function initDashboardCharts() {
+            const ctxGrowth = document.getElementById('growthChart').getContext('2d');
+            new Chart(ctxGrowth, {
+                type: 'line',
+                data: {
+                    labels: ['Sett 1', 'Sett 2', 'Sett 3', 'Sett 4'],
+                    datasets: [{
+                        label: 'Persone Aiutate',
+                        data: [Math.max(1, logs.length - 3), Math.max(2, logs.length - 2), Math.max(3, logs.length - 1), logs.length],
+                        borderColor: '#000080',
+                        backgroundColor: 'rgba(0, 0, 128, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            const ctxPie = document.getElementById('pieServerChart').getContext('2d');
+            const serverCounts = servers.map(s => logs.filter(l => l.serverId === s.id).length);
+
+            new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: servers.map(s => s.name),
+                    datasets: [{
+                        data: serverCounts.map(c => c === 0 ? 1 : c),
+                        backgroundColor: ['#5865F2', '#57F287', '#EB459E', '#FEE75C', '#3498db', '#e74c3c']
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            });
+        }
+
+        // --- 3D ANALYTICS WITH THREE.JS ---
+        function renderAnalytics(container) {
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-white border-2 border-inset p-3">
+                        <h3 class="text-xs font-bold border-b pb-1 mb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-cube text-indigo-700"></i> GRAFICO 3D INTERATTIVO - INCIDENZA SERVER DISCORD</span>
+                            <span class="text-[10px] text-gray-500">Ruota il modello con il trascinamento del mouse</span>
+                        </h3>
+                        <div id="threejs-canvas-container"></div>
+                    </div>
+
+                    <div class="bg-white border-2 border-inset p-3">
+                        <h4 class="text-xs font-bold mb-2 border-b pb-1"><i class="fa-solid fa-list-check"></i> RIEPILOGO DETTAGLIATO PER SERVER</h4>
+                        <table class="w-full text-xs text-left border-collapse border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border border-gray-300 p-1.5">Server Discord</th>
+                                    <th class="border border-gray-300 p-1.5">Tech Support</th>
+                                    <th class="border border-gray-300 p-1.5">Moderazione</th>
+                                    <th class="border border-gray-300 p-1.5">Totale Log</th>
+                                    <th class="border border-gray-300 p-1.5">Incidenza %</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${servers.map(s => {
+                                    const sTech = logs.filter(l => l.serverId === s.id && l.category === 'Tech Support').length;
+                                    const sMod = logs.filter(l => l.serverId === s.id && l.category === 'Moderazione').length;
+                                    const total = sTech + sMod;
+                                    const pct = logs.length > 0 ? ((total / logs.length) * 100).toFixed(1) : 0;
+                                    return `
+                                        <tr>
+                                            <td class="border border-gray-300 p-1.5 font-bold flex items-center gap-2">
+                                                <img src="${s.icon}" class="w-4 h-4 rounded" onerror="this.src='https://placehold.co/20x20'"> ${s.name}
+                                            </td>
+                                            <td class="border border-gray-300 p-1.5 text-blue-700">${sTech}</td>
+                                            <td class="border border-gray-300 p-1.5 text-red-700">${sMod}</td>
+                                            <td class="border border-gray-300 p-1.5 font-bold">${total}</td>
+                                            <td class="border border-gray-300 p-1.5">${pct}%</td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            initThreeJSPieChart();
+        }
+
+        function initThreeJSPieChart() {
+            const container = document.getElementById('threejs-canvas-container');
+            if (!container) return;
+
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x111122);
+
+            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.set(0, 5, 8);
+            camera.lookAt(0, 0, 0);
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 7);
+            scene.add(dirLight);
+
+            const pieGroup = new THREE.Group();
+            const total = logs.length || 1;
+            let startAngle = 0;
+
+            const colors = [0x5865F2, 0x57F287, 0xEB459E, 0xFEE75C, 0x3498db, 0xe74c3c];
+
+            servers.forEach((srv, idx) => {
+                const count = logs.filter(l => l.serverId === srv.id).length || 1;
+                const angle = (count / total) * Math.PI * 2;
+
+                const shape = new THREE.Shape();
+                shape.moveTo(0, 0);
+                shape.arc(0, 0, 2.5, startAngle, startAngle + angle, false);
+                shape.lineTo(0, 0);
+
+                const geometry = new THREE.ExtrudeGeometry(shape, { depth: 0.6, bevelEnabled: true, bevelSize: 0.05, bevelThickness: 0.05 });
+                const material = new THREE.MeshStandardMaterial({ color: colors[idx % colors.length], roughness: 0.3 });
+
+                const mesh = new THREE.Mesh(geometry, material);
+                mesh.rotation.x = -Math.PI / 2;
+                pieGroup.add(mesh);
+
+                startAngle += angle;
+            });
+
+            scene.add(pieGroup);
+
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('mousedown', () => isDragging = true);
+            renderer.domElement.addEventListener('mouseup', () => isDragging = false);
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    const deltaMove = { x: e.offsetX - previousMousePosition.x, y: e.offsetY - previousMousePosition.y };
+                    pieGroup.rotation.y += deltaMove.x * 0.01;
+                    pieGroup.rotation.x += deltaMove.y * 0.01;
+                }
+                previousMousePosition = { x: e.offsetX, y: e.offsetY };
+            });
+
+            function animate() {
+                window.threeAnimationId = requestAnimationFrame(animate);
+                if (!isDragging) pieGroup.rotation.y += 0.005;
+                renderer.render(scene, camera);
+            }
+            animate();
+        }
+
+        // --- DISCORD SERVERS ---
+        function renderServers(container) {
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-white border-2 border-inset p-2">
+                        <span class="text-xs font-bold"><i class="fa-brands fa-discord text-indigo-600"></i> SERVER DISCORD GESTITI (${servers.length})</span>
+                        <button class="button text-xs font-bold px-3 py-1 bg-emerald-100" onclick="openNewModal('server')">
+                            <i class="fa-solid fa-plus"></i> Aggiungi Server
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${servers.map(s => {
+                            const sLogs = logs.filter(l => l.serverId === s.id);
+                            return `
+                                <div class="bg-white border-2 border-inset p-3 flex flex-col justify-between">
+                                    <div class="flex items-center justify-between border-b pb-2">
+                                        <div class="flex items-center gap-3">
+                                            <img src="${s.icon}" class="w-10 h-10 rounded border" onerror="this.src='https://placehold.co/40x40'">
+                                            <div>
+                                                <div class="font-bold text-sm text-blue-900">${s.name}</div>
+                                                <div class="text-[10px] text-gray-500 uppercase">Categoria: ${s.category}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-1">
+                                            <button class="button text-xs px-2 py-0.5" data-crud-action="edit-server" data-id="${s.id}"><i class="fa-solid fa-pen"></i> Modifica</button>
+                                            <button class="button text-xs px-2 py-0.5 text-red-700 font-bold" data-crud-action="delete-server" data-id="${s.id}"><i class="fa-solid fa-trash"></i> Elimina</button>
+                                        </div>
+                                    </div>
+                                    <div class="my-3 space-y-1 text-xs">
+                                        <div class="flex justify-between"><span>Log Registrati:</span> <b>${sLogs.length}</b></div>
+                                        <div class="flex justify-between"><span>Piattaforma:</span> <b class="uppercase">${s.platform}</b></div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- TECH SUPPORT & MODERATION LOGS ---
+        function renderFilteredLogs(container, categoryFilter) {
+            const filtered = logs.filter(l => l.category === categoryFilter);
+
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center bg-white border-2 border-inset p-2">
+                        <div class="text-xs font-bold flex items-center gap-2">
+                            <i class="${categoryFilter === 'Tech Support' ? 'fa-solid fa-headset text-teal-700' : 'fa-solid fa-shield-halved text-red-700'}"></i>
+                            SEZIONE: ${categoryFilter.toUpperCase()} (${filtered.length})
+                        </div>
+                        <button class="button text-xs font-bold px-3 py-1 bg-blue-100" onclick="openNewModal('log', '${categoryFilter}')">
+                            <i class="fa-solid fa-plus"></i> Nuovo Log ${categoryFilter}
+                        </button>
+                    </div>
+
+                    ${categoryFilter === 'Moderazione' ? `
+                        <div class="bg-white border-2 border-inset p-3">
+                            <h4 class="text-xs font-bold mb-2 border-b pb-1"><i class="fa-solid fa-gavel text-red-700"></i> MOD LOGS TABELLA COMPLETA</h4>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-xs text-left border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-200">
+                                            <th class="border border-gray-300 p-1.5">Data</th>
+                                            <th class="border border-gray-300 p-1.5">Utente</th>
+                                            <th class="border border-gray-300 p-1.5">Azione</th>
+                                            <th class="border border-gray-300 p-1.5">Server</th>
+                                            <th class="border border-gray-300 p-1.5">Motivazione</th>
+                                            <th class="border border-gray-300 p-1.5 text-center">Azioni CRUD</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${filtered.map(l => {
+                                            const srv = servers.find(s => s.id === l.serverId) || { name: 'Unknown' };
+                                            return `
+                                                <tr>
+                                                    <td class="border border-gray-300 p-1.5 text-gray-500">${new Date(l.date).toLocaleDateString('it-IT')}</td>
+                                                    <td class="border border-gray-300 p-1.5 font-bold">${l.username}</td>
+                                                    <td class="border border-gray-300 p-1.5"><span class="badge-tag ${getBadgeClass(l.action)}">${l.action}</span></td>
+                                                    <td class="border border-gray-300 p-1.5">${srv.name}</td>
+                                                    <td class="border border-gray-300 p-1.5">${l.summary}</td>
+                                                    <td class="border border-gray-300 p-1.5 text-center">
+                                                        <button class="button text-[10px] px-1.5 py-0.5" data-crud-action="edit-log" data-id="${l.id}"><i class="fa-solid fa-pen"></i></button>
+                                                        <button class="button text-[10px] px-1.5 py-0.5 text-red-700 font-bold" data-crud-action="delete-log" data-id="${l.id}"><i class="fa-solid fa-trash"></i></button>
+                                                    </td>
+                                                </tr>
+                                            `;
+                                        }).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        ${filtered.map(log => {
+                            const srv = servers.find(s => s.id === log.serverId) || { name: 'Discord', icon: '' };
+                            return `
+                                <div class="bg-white border-2 border-inset p-3 flex flex-col justify-between space-y-2">
+                                    <div class="flex justify-between items-start border-b pb-2">
+                                        <div class="flex items-center gap-2">
+                                            <img src="${srv.icon}" class="w-6 h-6 rounded" onerror="this.src='https://placehold.co/24x24'">
+                                            <div>
+                                                <div class="font-bold text-xs text-blue-900">${log.username}</div>
+                                                <div class="text-[10px] text-gray-500">${srv.name}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1">
+                                            <span class="badge-tag ${getBadgeClass(log.action)}">${log.action}</span>
+                                            <button class="button text-[10px] px-1.5 py-0.5" data-crud-action="edit-log" data-id="${log.id}"><i class="fa-solid fa-pen"></i> Modifica</button>
+                                            <button class="button text-[10px] px-1.5 py-0.5 text-red-700 font-bold" data-crud-action="delete-log" data-id="${log.id}"><i class="fa-solid fa-trash"></i> Elimina</button>
+                                        </div>
+                                    </div>
+                                    <p class="text-xs text-gray-800 leading-snug bg-gray-50 p-2 border">"${log.summary}"</p>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- CALENDAR ENGINE ---
+        function renderCalendar(container) {
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-white border-2 border-inset p-3">
+                        <div class="flex justify-between items-center border-b pb-2 mb-3">
+                            <span class="text-xs font-bold"><i class="fa-solid fa-calendar-days text-green-700"></i> CALENDARIO IMPEGNI</span>
+                            <button class="button text-xs font-bold px-3 py-1 bg-emerald-100" onclick="openNewModal('calendar')">
+                                <i class="fa-solid fa-plus"></i> Nuovo Impegno
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                            ${events.map(ev => `
+                                <div class="flex justify-between items-center text-xs border-b pb-1">
+                                    <div>
+                                        <span class="font-bold text-blue-900">${ev.title}</span>
+                                        <span class="text-gray-500 text-[10px]"> (${ev.server})</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="badge-tag bg-gray-200">${ev.type}</span>
+                                        <span class="font-bold">${ev.date}</span>
+                                        <button class="button text-[10px] px-1.5 py-0.5" data-crud-action="edit-event" data-id="${ev.id}"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="button text-[10px] px-1.5 py-0.5 text-red-700 font-bold" data-crud-action="delete-event" data-id="${ev.id}"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- COMMUNITY ENGINE ---
+        function renderCommunity(container) {
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-white border-2 border-inset p-3">
+                        <div class="flex justify-between items-center border-b pb-2 mb-3">
+                            <span class="text-xs font-bold"><i class="fa-solid fa-share-nodes text-purple-700"></i> COMMUNITY ESTERNE</span>
+                            <button class="button text-xs font-bold px-3 py-1 bg-emerald-100" onclick="openNewModal('community')">
+                                <i class="fa-solid fa-plus"></i> Aggiungi Community
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            ${communities.map(c => `
+                                <div class="border p-3 bg-gray-50 text-xs space-y-2 flex flex-col justify-between">
+                                    <div>
+                                        <div class="flex justify-between items-center border-b pb-1">
+                                            <span class="font-bold text-blue-900">${c.name}</span>
+                                            <span class="badge-tag bg-purple-100 text-purple-800">${c.platform}</span>
+                                        </div>
+                                        <p class="text-gray-700 mt-2">${c.desc || 'Nessuna descrizione.'}</p>
+                                    </div>
+                                    <div class="flex justify-between items-center border-t pt-2 mt-2">
+                                        <span class="font-bold text-gray-600 text-[10px]">Ruolo: ${c.role}</span>
+                                        <div class="flex gap-1">
+                                            <button class="button text-[10px] px-1.5 py-0.5" data-crud-action="edit-community" data-id="${c.id}"><i class="fa-solid fa-pen"></i> Modifica</button>
+                                            <button class="button text-[10px] px-1.5 py-0.5 text-red-700 font-bold" data-crud-action="delete-community" data-id="${c.id}"><i class="fa-solid fa-trash"></i> Elimina</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- MODAL & FORM HANDLERS ---
+        function openNewModal(type = 'log', defaultCategory = 'Tech Support') {
+            if (type === 'log') {
+                document.getElementById('log-edit-id').value = '';
+                document.getElementById('log-modal-title').innerText = 'Registra Nuovo Log / Ticket';
+                document.getElementById('new-log-form').reset();
+                populateServerSelect();
+                document.getElementById('log-category').value = defaultCategory;
+                updateActionTypes();
+                openModal('log-modal');
+            } else if (type === 'server') {
+                document.getElementById('server-edit-id').value = '';
+                document.getElementById('server-modal-title').innerText = 'Aggiungi Server Discord';
+                document.getElementById('server-form').reset();
+                openModal('server-modal');
+            } else if (type === 'community') {
+                document.getElementById('community-edit-id').value = '';
+                document.getElementById('community-modal-title').innerText = 'Aggiungi Community Esterna';
+                document.getElementById('community-form').reset();
+                openModal('community-modal');
+            } else if (type === 'calendar') {
+                document.getElementById('event-edit-id').value = '';
+                document.getElementById('calendar-modal-title').innerText = 'Aggiungi Impegno Calendario';
+                document.getElementById('calendar-form').reset();
+                openModal('calendar-modal');
+            }
+        }
+
+        function openEditLogModal(id) {
+            const log = logs.find(l => l.id === id);
+            if (!log) return;
+            document.getElementById('log-edit-id').value = log.id;
+            document.getElementById('log-modal-title').innerText = 'Modifica Log / Ticket';
+            document.getElementById('log-username').value = log.username;
+            populateServerSelect();
+            document.getElementById('log-server').value = log.serverId;
+            document.getElementById('log-category').value = log.category;
+            updateActionTypes();
+            document.getElementById('log-action').value = log.action;
+            document.getElementById('log-summary').value = log.summary;
+            document.getElementById('log-screenshot').value = log.screenshot || '';
+            document.getElementById('log-link').value = log.link || '';
+            openModal('log-modal');
+        }
+
+        function openEditServerModal(id) {
+            const srv = servers.find(s => s.id === id);
+            if (!srv) return;
+            document.getElementById('server-edit-id').value = srv.id;
+            document.getElementById('server-modal-title').innerText = 'Modifica Server Discord';
+            document.getElementById('server-name').value = srv.name;
+            document.getElementById('server-icon').value = srv.icon;
+            document.getElementById('server-category').value = srv.category;
+            openModal('server-modal');
+        }
+
+        function openEditCommunityModal(id) {
+            const com = communities.find(c => c.id === id);
+            if (!com) return;
+            document.getElementById('community-edit-id').value = com.id;
+            document.getElementById('community-modal-title').innerText = 'Modifica Community Esterna';
+            document.getElementById('community-name').value = com.name;
+            document.getElementById('community-platform').value = com.platform;
+            document.getElementById('community-role').value = com.role;
+            document.getElementById('community-desc').value = com.desc;
+            openModal('community-modal');
+        }
+
+        function openEditEventModal(id) {
+            const ev = events.find(e => e.id === id);
+            if (!ev) return;
+            document.getElementById('event-edit-id').value = ev.id;
+            document.getElementById('calendar-modal-title').innerText = 'Modifica Impegno Calendario';
+            document.getElementById('event-title').value = ev.title;
+            document.getElementById('event-server').value = ev.server;
+            document.getElementById('event-date').value = ev.date;
+            document.getElementById('event-type').value = ev.type;
+            openModal('calendar-modal');
+        }
+
+        function handleSaveLog(e) {
+            e.preventDefault();
+            const editId = document.getElementById('log-edit-id').value;
+            const logData = {
+                id: editId || 'log-' + Date.now(),
+                username: document.getElementById('log-username').value,
+                serverId: document.getElementById('log-server').value,
+                category: document.getElementById('log-category').value,
+                action: document.getElementById('log-action').value,
+                summary: document.getElementById('log-summary').value,
+                screenshot: document.getElementById('log-screenshot').value,
+                link: document.getElementById('log-link').value,
+                date: editId ? (logs.find(l=>l.id===editId).date) : new Date().toISOString()
+            };
+
+            if (editId) {
+                const idx = logs.findIndex(l => l.id === editId);
+                if (idx !== -1) logs[idx] = logData;
+            } else {
+                logs.unshift(logData);
+            }
+
+            saveData();
+            closeModal('log-modal');
+            openNav(currentSection);
+        }
+
+        function handleSaveServer(e) {
+            e.preventDefault();
+            const editId = document.getElementById('server-edit-id').value;
+            const srvData = {
+                id: editId || 'srv-' + Date.now(),
+                name: document.getElementById('server-name').value,
+                icon: document.getElementById('server-icon').value || 'https://placehold.co/40x40/5865F2/ffffff?text=SRV',
+                category: document.getElementById('server-category').value,
+                platform: 'discord'
+            };
+
+            if (editId) {
+                const idx = servers.findIndex(s => s.id === editId);
+                if (idx !== -1) servers[idx] = srvData;
+            } else {
+                servers.push(srvData);
+            }
+
+            saveData();
+            closeModal('server-modal');
+            openNav(currentSection);
+        }
+
+        function handleSaveCommunity(e) {
+            e.preventDefault();
+            const editId = document.getElementById('community-edit-id').value;
+            const comData = {
+                id: editId || 'com-' + Date.now(),
+                name: document.getElementById('community-name').value,
+                platform: document.getElementById('community-platform').value,
+                role: document.getElementById('community-role').value,
+                desc: document.getElementById('community-desc').value
+            };
+
+            if (editId) {
+                const idx = communities.findIndex(c => c.id === editId);
+                if (idx !== -1) communities[idx] = comData;
+            } else {
+                communities.push(comData);
+            }
+
+            saveData();
+            closeModal('community-modal');
+            openNav(currentSection);
+        }
+
+        function handleSaveEvent(e) {
+            e.preventDefault();
+            const editId = document.getElementById('event-edit-id').value;
+            const evData = {
+                id: editId || 'ev-' + Date.now(),
+                title: document.getElementById('event-title').value,
+                server: document.getElementById('event-server').value || 'Discord',
+                date: document.getElementById('event-date').value,
+                type: document.getElementById('event-type').value
+            };
+
+            if (editId) {
+                const idx = events.findIndex(ev => ev.id === editId);
+                if (idx !== -1) events[idx] = evData;
+            } else {
+                events.push(evData);
+            }
+
+            saveData();
+            closeModal('calendar-modal');
+            openNav(currentSection);
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function populateServerSelect() {
+            const sel = document.getElementById('log-server');
+            if (sel) {
+                sel.innerHTML = servers.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+            }
+        }
+
+        function updateActionTypes() {
+            const cat = document.getElementById('log-category').value;
+            const actSel = document.getElementById('log-action');
+            if (cat === 'Moderazione') {
+                actSel.innerHTML = `
+                    <option value="Warn">Warn (Avvertimento)</option>
+                    <option value="Timeout">Timeout (Silenziamento)</option>
+                    <option value="Ban">Ban (Espulsione Definitiva)</option>
+                    <option value="Note">Note Moderatore</option>
+                `;
+            } else {
+                actSel.innerHTML = `
+                    <option value="Risoluzione HW/SW">Risoluzione HW/SW</option>
+                    <option value="Configurazione Bot">Configurazione Bot</option>
+                    <option value="Assistenza Ticket">Assistenza Ticket Generale</option>
+                `;
+            }
+        }
+
+        function getBadgeClass(action) {
+            switch(action) {
+                case 'Warn': return 'badge-warn';
+                case 'Timeout': return 'badge-timeout';
+                case 'Ban': return 'badge-ban';
+                default: return 'badge-tech';
+            }
+        }
+
+        function toggleStartMenu() {
+            const menu = document.getElementById('start-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function toggleWindow() {
+            const win = document.getElementById('main-window');
+            win.style.display = win.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function maximizeWindow() {
+            const win = document.getElementById('main-window');
+            win.classList.toggle('top-4');
+            win.classList.toggle('left-24');
+            win.classList.toggle('top-0');
+            win.classList.toggle('left-0');
+        }
+
+        function updateStatusBar() {
+            document.getElementById('total-logs-count').innerText = `Totale Log Registrati: ${logs.length}`;
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('real-time-clock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        window.onload = function() {
+            openNav('home');
+            saveData();
+        };
+    </script>
+</body>
+</html>
